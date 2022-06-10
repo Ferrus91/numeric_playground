@@ -1,6 +1,6 @@
 function extendedEuclidean(a, b) {
     let x1 = 1, y1 = 0, x2 = 0, y2 = 1, r1 = a, r2 = b; 
-    while(r2) {
+    while (r2) {
         const q = Math.floor(r1/r2);
         xTemp = x1 - q*x2;
         yTemp = y1 - q*y2;
@@ -20,8 +20,28 @@ function GCD(a, b) {
     return r; 
 }
 
+function GCDMultiple(...args) {
+    let currentGCD = args[0];
+    for (let i = 1; i < args.length; i++) {
+        currentGCD = GCD(currentGCD, args[i]);
+    }
+    return currentGCD;
+}
+
+
 function LCM(a, b) {
     return a*b/GCD(a, b);
+}
+
+function LCMMultiple(...args) {
+    if (args.length === 1) {
+        return args[0];
+    } else if (args.length === 2) {
+        return LCM(args[0], args[1]);
+    } else {
+        const lcdNum = args.shift();
+        return LCM(lcdNum, LCMMultiple(...args));
+    }
 }
 
 function findMultiplicativeInverse(num, modulo) {
