@@ -28,7 +28,6 @@ function GCDMultiple(...args) {
     return currentGCD;
 }
 
-
 function LCM(a, b) {
     return a*b/GCD(a, b);
 }
