@@ -74,154 +74,173 @@ class Node:
         ]
         return [first_line, second_line] + merged_lines, left_width + right_width + s_width, max(left_height, right_height) + 2, left_width + s_width // 2
 
-def insert(root, key):
-    if root is None:
-        return Node(key)
-    if key < root.key:
-        root.left = insert(root.left, key)
-    elif key > root.key:
-        root.right = insert(root.right, key)
-    recalculate_balancing_factor(root)
-    if abs(root.balancing_factor) > 1:
-        return rebalance_tree(root)
-    return root
+class AVLTree():
+    def __init__(self):
+        self.root = None
 
-def delete(root, key):
-    if root is None:
-        return None
-    if key < root.key:
-        root.left = delete(root.left, key)
-    elif key > root.key:
-        root.right = delete(root.right, key)
-    else:
-        if root.left is None:
-            return root.right
-        elif root.right is None:
-            return root.left
-        else:
-            in_order_successor = find_in_order_successor(root)
-            root.key = in_order_successor.key
-            root.right = delete(root.right, in_order_successor.key)
-    recalculate_balancing_factor(root)
-    if abs(root.balancing_factor) > 1:
-        return rebalance_tree(root)
-    return root
+    def __str__(self):
+        return str(self.root)
+    
+    def insert(self, key):
+        self.root = self.__insert_key(self.root, key)
 
-def recalculate_balancing_factor(root):
-    left_height = root.left.height if root.left is not None else 0
-    right_height =  root.right.height if root.right is not None else 0
-    root.height = 1 + max(left_height, right_height)
-    root.balancing_factor = left_height - right_height
+    def delete(self, key):
+        self.root = self.__delete_key(self.root, key)
 
-def rebalance_tree(root):
-    if root.balancing_factor > 1:
-        if root.left.balancing_factor > 0:
-            return rr_rotation(root)
-        else:
-            return lr_rotation(root)
-    elif root.balancing_factor < -1:
-        if root.right.balancing_factor < 0:
-            return ll_rotation(root)
-        else:
-            return rl_rotation(root)
+    def has_key(self, root, key):
+        key_node = self.__find_key(root, key)
+        return key_node is not None
 
-def rr_rotation(root):
-    rotated_root = right_rotation(root)
-    return rotated_root
-
-def lr_rotation(root):
-    root.left = left_rotation(root.left)
-    return right_rotation(root)
-
-def ll_rotation(root):
-    rotated_root = left_rotation(root)
-    return rotated_root
-
-def rl_rotation(root):
-    root.right = right_rotation(root.right)
-    return left_rotation(root)
-
-def left_rotation(root):
-    rotated_root = root.right
-    rotated_root_left = rotated_root.left
-    rotated_root.left = root
-    root.right = rotated_root_left
-    recalculate_balancing_factor(root)
-    recalculate_balancing_factor(rotated_root)
-    return rotated_root
-
-def right_rotation(root):
-    rotated_root = root.left
-    rotated_root_right = rotated_root.right
-    rotated_root.right = root
-    root.left = rotated_root_right
-    recalculate_balancing_factor(root)
-    recalculate_balancing_factor(rotated_root)
-    return rotated_root
-
-def has_key(root, key):
-    key_node = find_key(root, key)
-    return key_node is not None
-
-def find_key(root, key):
-    if root is None:
-        return None
-    if key == root.key:
+    def __insert_key(self, root, key):
+        if root is None:
+            return Node(key)
+        if key < root.key:
+            root.left = self.__insert_key(root.left, key)
+        elif key > root.key:
+            root.right = self.__insert_key(root.right, key)
+        self.__recalculate_balancing_factor(root)
+        if abs(root.balancing_factor) > 1:
+            return self.__rebalance_tree(root)
         return root
-    elif key < root.key:
-        return find_key(root.left, key)
-    else:
-        return find_key(root.right, key)
 
-def find_in_order_successor(root):
-    start = root.right
-    if start is None:
-        return None
-    else:
-        current_successor = root.right
-        while current_successor.left is not None:
-            current_successor = current_successor.left
-        return current_successor
+    def __delete_key(self, root, key):
+        if root is None:
+            return None
+        if key < root.key:
+            root.left = self.__delete_key(root.left, key)
+        elif key > root.key:
+            root.right = self.__delete_key(root.right, key)
+        else:
+            if root.left is None:
+                return root.right
+            elif root.right is None:
+                return root.left
+            else:
+                in_order_successor = self.__find_in_order_successor(root)
+                root.key = in_order_successor.key
+                root.right = self.__delete_key(root.right, in_order_successor.key)
+        self.__recalculate_balancing_factor(root)
+        if abs(root.balancing_factor) > 1:
+            return  self.__rebalance_tree(root)
+        return root
 
-root = Node(random.randint(0, 100))
-root = insert(root, random.randint(0, 100))
-root = insert(root, random.randint(0, 100))
-root = insert(root, random.randint(0, 100))
-root = insert(root, random.randint(0, 100))
-root = insert(root, random.randint(0, 100))
-root = insert(root, random.randint(0, 100))
-root = insert(root, random.randint(0, 100))
+    def __recalculate_balancing_factor(self, root):
+        left_height = root.left.height if root.left is not None else 0
+        right_height =  root.right.height if root.right is not None else 0
+        root.height = 1 + max(left_height, right_height)
+        root.balancing_factor = left_height - right_height
+
+    def __rebalance_tree(self, root):
+        if root.balancing_factor > 1:
+            if root.left.balancing_factor > 0:
+                return self.__rr_rotation(root)
+            else:
+                return self.__lr_rotation(root)
+        elif root.balancing_factor < -1:
+            if root.right.balancing_factor < 0:
+                return self.__ll_rotation(root)
+            else:
+                return self.__rl_rotation(root)
+
+    def __rr_rotation(self, root):
+        rotated_root = self.__right_rotation(root)
+        return rotated_root
+
+    def __lr_rotation(self, root):
+        root.left = self.__left_rotation(root.left)
+        return self.__right_rotation(root)
+
+    def __ll_rotation(self, root):
+        rotated_root = self.__left_rotation(root)
+        return rotated_root
+
+    def __rl_rotation(self, root):
+        root.right = self.__right_rotation(root.right)
+        return self.__left_rotation(root)
+
+    def __left_rotation(self, root):
+        rotated_root = root.right
+        rotated_root_left = rotated_root.left
+        rotated_root.left = root
+        root.right = rotated_root_left
+        self.__recalculate_balancing_factor(root)
+        self.__recalculate_balancing_factor(rotated_root)
+        return rotated_root
+
+    def __right_rotation(self, root):
+        rotated_root = root.left
+        rotated_root_right = rotated_root.right
+        rotated_root.right = root
+        root.left = rotated_root_right
+        self.__recalculate_balancing_factor(root)
+        self.__recalculate_balancing_factor(rotated_root)
+        return rotated_root
+
+    def __find_key(self, root, key):
+        if root is None:
+            return None
+        if key == root.key:
+            return root
+        elif key < root.key:
+            return self.__find_key(root.left, key)
+        else:
+            return self.__find_key(root.right, key)
+
+    def __find_in_order_successor(self, root):
+        start = root.right
+        if start is None:
+            return None
+        else:
+            current_successor = root.right
+            while current_successor.left is not None:
+                current_successor = current_successor.left
+            return current_successor
+
+tree = AVLTree()
+tree.insert(random.randint(0, 100))
+tree.insert(random.randint(0, 100))
+tree.insert(random.randint(0, 100))
+tree.insert(random.randint(0, 100))
+tree.insert(random.randint(0, 100))
+tree.insert(random.randint(0, 100))
+tree.insert(random.randint(0, 100))
+tree.insert(random.randint(0, 100))
+tree.insert(random.randint(0, 100))
+tree.insert(random.randint(0, 100))
+tree.insert(random.randint(0, 100))
+tree.insert(random.randint(0, 100))
+tree.insert(random.randint(0, 100))
+tree.insert(random.randint(0, 100))
+tree.insert(random.randint(0, 100))
+tree.insert(random.randint(0, 100))
+tree.insert(random.randint(0, 100))
+tree.insert(random.randint(0, 100))
+tree.insert(random.randint(0, 100))
+tree.insert(random.randint(0, 100))
 val = random.randint(0, 100)
-root = insert(root, val)
-root = insert(root, random.randint(0, 100))
-root = insert(root, random.randint(0, 100))
-root = insert(root, random.randint(0, 100))
-root = insert(root, random.randint(0, 100))
-root = insert(root, random.randint(0, 100))
-root = insert(root, random.randint(0, 100))
-root = insert(root, random.randint(0, 100))
-root = insert(root, random.randint(0, 100))
-root = insert(root, random.randint(0, 100))
-root = insert(root, random.randint(0, 100))
-root = insert(root, random.randint(0, 100))
-root = insert(root, random.randint(0, 100))
-root = insert(root, random.randint(0, 100))
-root = insert(root, random.randint(0, 100))
-root = insert(root, random.randint(0, 100))
-root = insert(root, random.randint(0, 100))
-root = insert(root, random.randint(0, 100))
-root = insert(root, random.randint(0, 100))
-root = insert(root, random.randint(0, 100))
-root = insert(root, random.randint(0, 100))
-root = insert(root, random.randint(0, 100))
-root = insert(root, random.randint(0, 100))
-root = insert(root, random.randint(0, 100))
-root = insert(root, random.randint(0, 100))
-root = insert(root, random.randint(0, 100))
-root = insert(root, random.randint(0, 100))
-root = insert(root, random.randint(0, 100))
-root = insert(root, random.randint(0, 100))
-print(root)
+tree.insert(val)
+tree.insert(random.randint(0, 100))
+tree.insert(random.randint(0, 100))
+tree.insert(random.randint(0, 100))
+tree.insert(random.randint(0, 100))
+tree.insert(random.randint(0, 100))
+tree.insert(random.randint(0, 100))
+tree.insert(random.randint(0, 100))
+tree.insert(random.randint(0, 100))
+tree.insert(random.randint(0, 100))
+tree.insert(random.randint(0, 100))
+tree.insert(random.randint(0, 100))
+tree.insert(random.randint(0, 100))
+tree.insert(random.randint(0, 100))
+tree.insert(random.randint(0, 100))
+tree.insert(random.randint(0, 100))
+tree.insert(random.randint(0, 100))
+tree.insert(random.randint(0, 100))
+tree.insert(random.randint(0, 100))
+tree.insert(random.randint(0, 100))
+tree.insert(random.randint(0, 100))
+tree.insert(random.randint(0, 100))
+print(tree)
 print('Deleting: ', val)
-root = delete(root, val)
-print(root)
+tree.delete(val)
+print(tree)
